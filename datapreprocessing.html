@@ -1,0 +1,214 @@
+
+<div><p></p></div>
+<h3>Data Preprocessing</h3>
+<p>Data preprocessing is a data mining technique that involves transforming raw data into an understandable format.</p>
+<p>Real-world data is often incomplete, inconsistent, and/or lacking in certain behaviors or trends, and is likely to contain many errors. Data preprocessing is a proven method of resolving such issues. Data preprocessing prepares raw data for further processing.</p>
+<h4>Common steps involved in Data Preprocessing</h4>
+<ol>
+  <li>Read the Dataset</li>
+  <li>Dealing with missing values</li>
+  <li>Dealing with categorical data</li>
+  <ul>
+    <li>Ordinal feature mapping</li>
+    <li>Label Encoding</li>
+    <li>One-Hot Encoding</li>
+  </ul>
+  <li>Feature Scaling</li>
+  <li>Splitting dataset into training and testing sets</li>
+</ol>
+<h4>Reading Dataset</h4>
+<p><b>pandas</b> is a software library written for the Python programming language for easy and high performancedata manipulation and analysis</p>
+<p>You can read data from a CSV file using the read_csv function. By default, it assumes that the fields are comma-separated.</p>
+<p>
+<pre><code class="language-python">
+  import pandas as pd
+
+  #loading csv file using pandas
+  df = pd.read_csv('Weather.csv')
+
+  #Preview DataFrames with head()
+  df.head()
+</code></pre>
+</p>
+<img src="./images/head.xcf" alt="head.xcf">
+
+<h4>Dealing with missing values</h4>
+<p>For various reasons, many real world datasets contain missing values, often encoded as blanks, NaNs or other placeholders. But scikit-learn assume that all values in an array are numerical, and that all have and hold meaning. There is various ways to handle missing values of categorical ways.</p>
+<ol>
+    <li>Ignore observations of missing values if we are dealing with large data sets and less number of records has missing values
+    <li>Ignore variable, if it is not significant
+    <li>Replace with mean, meaian, mode(for neumeric data)
+    <li>Replace by most frequent value(for categorical data)
+    <li>Missing values can be treated as a separate category by itself(for categorical data)
+    <li>Develop model to predict missing values
+</ol>
+<p>we need to check wether dataset contains missing values or not</p>
+<p><pre><code class="language-python">
+  #to check any columns contains missing vaues
+  df.isnull().any()
+  #to check count of missing vaues column wise
+  df.isnull().sum()
+  #to check count of missing vaues row wise
+  df.isnull().sum(axis = 1)
+</code></pre>
+</p>
+<p><b>Deleting rows from dataframe</b></p>
+<p>To delete rows and columns from DataFrames, Pandas uses the drop() function.</p>
+<p>The drop() function in Pandas be used to delete rows from a DataFrame, with the axis set to 0.</p>
+<p>
+<pre style="background-color:light blue"><code class="language-python">
+  """droping all rows with missing cells via
+  using pandas.DataFrame.dropna()"""
+  #df.dropna()
+
+  #or some rows
+
+  X = df.iloc[:,:-1]
+  y = df.iloc[:,-1]
+  # Delete all rows with name 13
+  #X = X.drop(13, axis=0)
+  # Delete the rows with labels 0,1,4
+  X = X.drop([0,1,4], axis=0)
+</code></pre>
+</p>
+<p><b>Deleting columns from dataframe</b></p>
+<p>The drop() function in Pandas be used to delete columns from a DataFrame, with the axis set to 1.</p>
+<p>
+<pre><code class="language-python">
+  # Delete column with name "Windy"
+  X = X.drop("Windy", axis=1)
+  # Delete multiple columns by providing list
+  #X = X.drop(["Windy","Humidity"], axis=1)
+</code></pre>
+</p>
+<p><b>Imputation of missing values</b></p>
+<p>
+  The ploblem with the above two strategies is losing data which may be valuable (even though incomplete). A better strategy is to impute the missing values, i.e., to infer them from the known part of the data
+</p>
+<p><b>Imputation of Neumeric Variables- Mean, Median and Mode</b></p>
+<p>Computing the overall mean, median or mode is a very basic imputation method and it is very fast.  Scikit Learn preprocessing contains a class called <b>Imputer</b> which will help us take care of the missing data.</p>
+<p>
+<pre><code class="language-python">
+  from sklearn.preprocessing import Imputer
+  imputer = Imputer(missing_values="NaN", strategy="mean")
+  neumeric_values = X.iloc[:,1:3]
+  X.iloc[:,1:3] = imputer.fit_transform(neumeric_values)
+</code></pre>
+</p>
+
+<p><b>Imputation of Categorical Variables</b></p>
+<p>we can handle in two ways
+  <ol>
+    <li>Replace by most frequent value(Mode)
+    <li>Missing values can be treated as a separate category by itself
+  </ol>
+</p>
+<p>
+<pre><code class="language-python">
+  #getting mode
+  md = X['Outlook'].mode()
+  #filling missing values with mode
+  X['Outlook'] = X['Outlook'].fillna(md[0])
+
+  # or
+
+  """Missing values can be treated as a separate
+  category by itself here it is Unknown"""
+  X['Outlook'] = X['Outlook'].fillna('Unknown')
+</code></pre>
+</p>
+
+<h4>Dealing with categorical data</h4>
+<p>As we know scikit-learn models accepts only numerical data. If any categorical variables present in dataset we need to convert tem into neumerics</p>
+<p>Even among categorical data, we may want to distinguish further between nominal and ordinal which can be sorted or ordered features. So, T-shirt size can be an ordinal feature, because we can define an order XL > L > M.</p>
+<p><b>Ordinal feature mapping</b></p>
+<p>we should convert the categorical string values into integers.
+However, since there is no convenient function that can automatically derive the correct order of the labels of our size feature, we have to define the mapping manually</p>
+<p>
+<pre><code class="language-python">
+  color = ['green', 'red','blue']
+  size = ['M','L','XL']
+  price = [10.1, 13.5,15.3]
+  classLabel =['c1','c2','c1']
+  a = list(zip(color,size,price,classLabel))
+  df1 = pd.DataFrame(data = a,
+  columns = ["color","size","price","classLabel"])
+
+  size_mapping = {'M':1,'L':2,'XL':3}
+  df1['size']=df1['size'].map(size_mapping)
+  df1
+  size_mapping.items()
+</code></pre>
+</p>
+
+<p><b>Label Encoding(Nominal feature encoding)</b></p>
+<p>Label Encoding is a utility class to help normalize labels such that they contain only values between 0 and n_classes-1. </p>
+<p>Because scikit-learn's estimators treat class labels without any order, we can use LabelEncoder class to encode the string labels into integers.</p>
+<p>
+<pre><code class="language-python">
+  #will not accept nan's
+  from sklearn.preprocessing import LabelEncoder
+  labelencoder_X = LabelEncoder()
+  X.iloc[:, 0] = labelencoder_X.fit_transform(X.iloc[:, 0])
+  labelencoder_y = LabelEncoder()
+  y = labelencoder_y.fit_transform(y)
+</code></pre>
+</p>
+<p><b>One Hot Encoding(Nominal feature encoding)</b></p>
+<p>
+  LabelEncoder tranforms categorical feature to one new feature of integers (0 to n_categories - 1)
+  in our example Outlook values (sunny, rainy, Overcast) into (0,1,2) here 2(Overcast) is not greater than 0(sunny)
+  Such integer representation can, however, not be used directly with all scikit-learn estimators, as these expect continuous input, and would interpret the categories as being ordered, which is often not desired
+</p>
+<p>
+  Another possibility to convert categorical features to features that can be used with scikit-learn estimators is to use a one-of-K, also known as one-hot or dummy encoding. This type of encoding can be obtained with the OneHotEncoder, which transforms each categorical feature with n_categories possible values into n_categories.
+</p>
+<p>
+<pre><code class="language-python">
+  from sklearn.preprocessing import OneHotEncoder
+  onehot = OneHotEncoder(categorical_features = [0])
+  #make sure that X shoud have only neumeric values
+  X = onehot.fit_transform(X).toarray()
+</code></pre>
+</p>
+
+<p><b>Feature scaling</b></p>
+<p>
+  Feature scaling is a method used to standardize the range of independent variables, it is also known as data normalization
+</p>
+<p>
+  Since the range of values of raw data varies widely, in some machine learning algorithms, objective functions will not work properly without normalization. For example, the majority of classifiers calculate the distance between two points by the Euclidean distance. If one of the features has a broad range of values, the distance will be governed by this particular feature. Therefore, the range of all features should be normalized so that each feature contributes approximately proportionately to the final distance.
+</p>
+<p>
+  Another reason why feature scaling is applied is that gradient descent converges much faster with feature scaling than without it.
+</p>
+<p>
+  Feature scaling methods are
+  <ol>
+    <li>Standardization</li>
+    <li>Rescaling (min-max normalization)</li>
+    <li>Mean normalization</li>
+    <li>Scaling to unit length</li>
+  </ol>
+</p>
+<p><b>Standardization</b></p>
+<p>
+  Standardization is widely used for normalization in many machine learning algorithms (e.g., support vector machines, logistic regression, and artificial neural networks).
+  Feature standardization makes the values of each feature in the data have zero-mean (when subtracting the mean in the numerator) and unit-variance
+</p>
+<p><img src="./images/standard_scaler.svg" alt="standars scaler formula"/></p>
+<p><b>min-max normalization</b></p>
+<p><img src="./images/min_max.svg" alt="min_max scaler formula"/></p>
+<p><b>Mean normalization</b></p>
+<p><img src="./images/mean_norm.svg" alt="mean_norm formula"/></p>
+<p><b>Unit Vector normalization</b></p>
+<p><img src="./images/unit_vec.svg" alt="unit vector formula"/></p>
+
+<p>We can use sklearn StandardScaler for normalize features</p>
+<p>
+<pre><code class="language-python">
+  from sklearn.preprocessing import StandardScaler
+  sctandardscaler = StandardScaler()
+  X = sctandardscaler.fit_transform(X)
+</code></pre>
+</p>
