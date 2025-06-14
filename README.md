@@ -1,3 +1,7 @@
+Name : B Vamshi Krishna
+ID no : B201480
+class : Cse-C4
+
 # 🧠 Machine Learning Lab
 
 This repository contains lab experiments for various machine learning algorithms. It is intended for academic and practical learning purposes, providing implementations using Python and Jupyter Notebooks.
